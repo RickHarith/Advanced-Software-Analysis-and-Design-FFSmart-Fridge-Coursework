@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome Chefs!</title>
+    <link rel="stylesheet" type="text/css" href="global.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-brand">FFsmart Fridge</div>
+    <div class="navbar-links">
+        <a href="chefmain.html">Inventory</a>
+        <a href="makeorder.html">Make an Order</a>
+        <a href="inventoryhistory.html">Inventory History</a>
+        <div class="notification">
+            <a href="#" class="notification-link" onclick="toggleNotificationMenu()">Notifications</a>
+            <div class="notification-menu" id="notificationMenu">
+            </div>
+        </div>
+        <div id="logoutButtonContainer"></div>
+    </div>
+</nav>
+<div class="content">
+    <h1>Fridge Inventory</h1>
+    <table class="inventory-table">
+        <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Quantity</th>
+            <th>Expiry Date</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="inventoryTableBody">
+        </tbody>
+    </table>
+    <form id="updateInventoryForm">
+        <button class="button" type="submit">Take or Add Items</button>
+    </form>
+</div>
+<div class="form-container">
+    <h1>Add Item to Fridge Inventory</h1>
+    <form id="addItemForm">
+        <input type="text" id="itemName" placeholder="Item Name" required>
+        <input type="number" id="itemQuantity" placeholder="Quantity" required min="0">
+        <input type="text" id="itemExpiry" placeholder="Expiry Date" onfocus="(this.type='date')"
+               onblur="(this.type='text')" required>
+        <input type="submit" value="Add Item" class="form-submit-button">
+    </form>
+</div>
+</table>
+<script>
+    // Attach event listeners to the forms
+    document.getElementById('updateInventoryForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        submitChanges();
+    });
+
+    document.getElementById('addItemForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        addItem();
+    });
+
+    async function loadInventory() {
+        try {
+            const response = await fetch('/inventory/all');
+            const inventory = await response.json();
+
+            // Sort the inventory items by item name in alphabetical order
+            inventory.sort((a, b) => a.itemName.localeCompare(b.itemName));
+
+            const inventoryTableBody = document.getElementById('inventoryTableBody');
+            inventoryTableBody.innerHTML = '';
+
+            // Inside loadInventory function
+            inventory.forEach(item => {
+                const row = document.createElement('tr');
+                row.dataset.itemId = item.itemId;
+                const itemNameCell = document.createElement('td');
+                const quantityCell = document.createElement('td');
+                const expiryDateCell = document.createElement('td');
+                const actionCell = document.createElement('td');
+                const plusButton = document.createElement('button');
+                const minusButton = document.createElement('button');
+                const deleteButton = document.createElement('button');
+
+                itemNameCell.textContent = item.itemName;
+                quantityCell.textContent = item.itemQuantity;
+                expiryDateCell.textContent = item.itemExpiry;
+                plusButton.textContent = '+';
+                minusButton.textContent = '-';
+                deleteButton.textContent = 'Delete';
+
+                plusButton.onclick = () => adjustQuantity(item.itemId, item, 1);
+                minusButton.onclick = () => adjustQuantity(item.itemId, item, -1);
+                deleteButton.onclick = () => deleteItem(item.itemId);
+
+                actionCell.appendChild(plusButton);
+                actionCell.appendChild(minusButton);
+                actionCell.appendChild(deleteButton);
+
+                row.appendChild(itemNameCell);
+                row.appendChild(quantityCell);
+                row.appendChild(expiryDateCell);
+                row.appendChild(actionCell);
+
+                inventoryTableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading inventory:', error);
+        }
+    }
+
+    async function deleteItem(itemId) {
+        if (!confirm("Are you sure you want to delete this item?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/inventory/delete/${itemId}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Item deleted successfully!');
+                loadInventory(); // Reload the inventory to reflect the changes
+            } else {
+                alert('Error deleting item');
+            }
+        } catch (error) {
+            console.error('Error deleting item:', error);
+        }
+    }
+
+    async function adjustQuantity(itemId, item, change) {
+        const inventoryTableBody = document.getElementById('inventoryTableBody');
+        const rows = inventoryTableBody.getElementsByTagName('tr');
+        const rowIndex = Array.from(rows).findIndex(row => row.dataset.itemId === itemId.toString());
+
+        if (rowIndex >= 0) {
+            const quantityCell = rows[rowIndex].getElementsByTagName('td')[1];
+            const currentQuantity = parseInt(quantityCell.textContent);
+            const updatedQuantity = currentQuantity + change;
+
+            if (updatedQuantity >= 0) {
+                quantityCell.textContent = updatedQuantity;
+            }
+        }
+    }
+
+    async function submitChanges() {
+        // Prepare the updated inventory data to send to the server
+        const inventoryTableBody = document.getElementById('inventoryTableBody');
+        const rows = inventoryTableBody.getElementsByTagName('tr');
+        const updatedInventory = [];
+
+        Array.from(rows).forEach(row => {
+            const itemId = row.dataset.itemId; // Retrieve the item ID
+            const itemName = row.getElementsByTagName('td')[0].textContent;
+            const itemQuantity = parseInt(row.getElementsByTagName('td')[1].textContent);
+
+            updatedInventory.push({ itemId, itemName, itemQuantity });
+        });
+
+        // Send the updated inventory data to the server
+        try {
+            const response = await fetch('/inventory/submitchanges', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedInventory)
+            });
+
+            if (response.ok) {
+                alert('Changes submitted successfully!');
+            } else {
+                // Handle the error response here
+                const errorData = await response.json();
+                if (errorData.error) {
+                    // Display an alert with the error message
+                    alert(errorData.error);
+                } else {
+                    console.error('Error submitting changes:', response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error('Error submitting changes:', error);
+        }
+    }
+    async function addItem() {
+        const itemNameInput = document.getElementById('itemName');
+        const itemQuantityInput = document.getElementById('itemQuantity');
+        const itemExpiryInput = document.getElementById('itemExpiry'); // Add this line
+
+        const newItem = {
+            itemName: itemNameInput.value,
+            itemQuantity: parseInt(itemQuantityInput.value),
+            itemExpiry: itemExpiryInput.value // Get the expiry date input value
+        };
+
+        try {
+            const response = await fetch('/inventory/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newItem)
+            });
+
+            if (response.ok) {
+                // Item added successfully, reload the inventory
+                loadInventory();
+                itemNameInput.value = ''; // Clear the input fields
+                itemQuantityInput.value = '';
+                itemExpiryInput.value = ''; // Clear the expiry date input
+            } else {
+                const errorData = await response.json();
+                if (errorData.error) {
+                    alert(errorData.error);
+                } else {
+                    console.error('Error adding item:', response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error('Error adding item:', error);
+        }
+    }
+
+    const notificationMenu = document.getElementById('notificationMenu');
+    let notificationTimeout;
+
+    // Function to toggle the notification menu
+    function toggleNotificationMenu() {
+        const notification = document.querySelector('.notification'); // Get the notification container
+        notification.classList.toggle('active'); // Toggle the 'active' class
+        loadNotifications(); // Load notifications when the menu is opened
+    }
+
+    // Function to load and display notifications
+    async function loadNotifications() {
+        try {
+            const response = await fetch('/inventory/notifications');
+            const notifications = await response.json();
+
+            console.log('Fetched notifications:', notifications);
+
+            // Clear previous notifications
+            notificationMenu.innerHTML = '';
+
+            if (notifications.length === 0) {
+                const noNotificationsItem = document.createElement('div');
+                noNotificationsItem.classList.add('notification-item');
+                noNotificationsItem.textContent = 'No notifications';
+                notificationMenu.appendChild(noNotificationsItem);
+            } else {
+                notifications.forEach(notification => {
+                    // Split the message to extract the date part
+                    const messageParts = notification.message.split('\n');
+                    const expiryDateString = messageParts.length > 1 ? messageParts[1] : null;
+
+                    if (!expiryDateString) {
+                        console.error('Expiry date is missing in notification:', notification);
+                        return;
+                    }
+
+                    const currentDate = new Date();
+                    currentDate.setHours(0, 0, 0, 0); // Set the current date to midnight
+
+                    // Split the date string and adjust the month
+                    const [year, month, day] = expiryDateString.split('-').map(Number);
+                    const expiryDate = new Date(year, month - 1, day, 23, 59, 59); // Month is zero-based, set time to end of the day
+
+                    const timeDifference = expiryDate - currentDate;
+                    const daysLeft = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+                    console.log(`Current Date: ${currentDate}`);
+                    console.log(`Expiry Date: ${expiryDate}`);
+                    console.log(`Time Difference: ${timeDifference}`);
+                    console.log(`Days Left: ${daysLeft}`);
+
+                    if (daysLeft >= 0 && daysLeft <= 3) {
+                        const notificationItem = document.createElement('div');
+                        notificationItem.classList.add('notification-item');
+                        const itemSpan = document.createElement('span');
+                        itemSpan.textContent = notification.message; // Use the original message
+
+                        notificationItem.appendChild(itemSpan);
+                        notificationMenu.appendChild(notificationItem);
+                        console.log('Notification added to menu:', notificationItem);
+                    }
+
+                });
+            }
+
+            clearTimeout(notificationTimeout);
+            notificationTimeout = setTimeout(() => {
+                notificationMenu.classList.remove('active');
+            }, 3000); // Adjust the duration as needed
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+        }
+    }
+
+    async function logout() {
+        try {
+            const response = await fetch('/logout');
+            const data = await response.json();
+
+            alert(data.message);
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    }
+
+    async function checkLoginStatusAndDisplayLogout() {
+        try {
+            const response = await fetch('/is-logged-in');
+            const data = await response.json();
+
+            const buttonContainer = document.getElementById('logoutButtonContainer');
+            buttonContainer.innerHTML = '';
+
+            if (data.loggedIn) {
+                const logoutButton = document.createElement('button');
+                logoutButton.textContent = 'Log Out';
+                logoutButton.onclick = logout;
+                buttonContainer.appendChild(logoutButton);
+            } else {
+                const loginButton = document.createElement('button');
+                loginButton.textContent = 'Log In | Sign Up';
+                loginButton.onclick = () => window.location.href = 'index.html';
+                buttonContainer.appendChild(loginButton);
+            }
+        } catch (error) {
+            console.error('Error checking login status:', error);
+        }
+    }
+
+
+    // Load inventory data on page load
+    window.onload = function () {
+        checkLoginStatusAndDisplayLogout();
+        loadInventory();
+        loadNotifications();
+    };
+</script>
+</body>
+</html>

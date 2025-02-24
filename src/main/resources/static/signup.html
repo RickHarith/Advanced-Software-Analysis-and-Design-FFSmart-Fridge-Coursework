@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <link rel="stylesheet" type="text/css" href="global.css"/>
+  <script>
+    function submitForm(event) {
+      event.preventDefault();
+
+      document.getElementById('message').textContent = '';
+      document.getElementById('error').textContent = '';
+
+      var fullname = document.getElementById('fullname').value;
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      var role = document.getElementById('role').value;
+
+      fetch('/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fullname: fullname, username: username, password: password, role: role })
+      })
+              .then(response => {
+                if (!response.ok) {
+                  return response.json().then(err => { throw err; });
+                }
+                return response.json();
+              })
+              .then(data => {
+                document.getElementById('message').textContent = data.message || 'Success!';
+                setTimeout(() => {
+                  window.location.href = 'login.html';
+                }, 500);
+              })
+              .catch(error => {
+                document.getElementById('error').textContent = error.error || 'An error occurred.';
+              });
+    }
+  </script>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-brand">FFsmart Fridge</div>
+  <div class="navbar-links">
+    <a href="login.html">Log In</a>
+  </div>
+</nav>
+<div class="form-container signup-form">
+<h2>Sign Up</h2>
+<form onsubmit="submitForm(event)">
+  <input type="text" id="fullname" name="fullname" pattern="[A-Za-z ]+" placeholder="Full Name" required><br>
+  <input type="text" id="username" name="username" placeholder="Username" required><br>
+  <input type="password" id="password" name="password" pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}" placeholder="Password" required><br>
+  <label>Password must contain at least one uppercase letter, one number, and one symbol</label>
+  <select id="role" name="role">
+    <option value="Chef">Chef</option>
+    <option value="Delivery Person">Delivery Person</option>
+  </select><br>
+
+  <div id="message" style="color: green;"></div>
+  <div id="error" style="color: red;"></div>
+
+  <input type="submit" value="Sign Up" class="form-submit-button">
+</form>
+</div>
+</body>
+</html>

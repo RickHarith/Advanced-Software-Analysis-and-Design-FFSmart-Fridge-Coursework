@@ -1,0 +1,492 @@
+/* Reset margin and padding for the entire page */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center; /* Vertically align items in the navbar */
+}
+
+.navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    margin-right: 20px; /* Add some spacing between links */
+}
+
+.navbar-links a:hover {
+    background-color: #555;
+}
+
+/* Notification styles */
+.notification {
+    position: relative;
+    display: inline-block; /* Ensure it takes the width of its content */
+}
+
+.notification-link {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    display: inline-block; /* Display as a block element */
+}
+
+.notification-link:hover {
+    background-color: #555;
+}
+
+.notification-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1;
+    white-space: normal; /* Allow line breaks in notifications */
+    font-size: 16px;
+    padding: 10px 0;
+    color: black/* Add padding to the menu */
+}
+
+/* Add an 'active' class to make the menu visible */
+.notification.active .notification-menu {
+    display: block;
+    right: -20px;
+}
+
+/* Notification item styles */
+.notification-item {
+    padding: 20px 20px 20px 20px;
+    text-align: left;
+    white-space: normal;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Style the notification text */
+.notification-item span {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Style the notification timestamp if available */
+.notification-item .timestamp {
+    color: #999;
+    font-size: 14px;
+}
+
+/* Content styles */
+.content {
+    margin-top: 50px;
+}
+
+.content h1 {
+    margin-bottom: 20px;
+}
+
+.content a {
+    display: inline-block;
+    margin: 10px;
+    text-decoration: none;
+}
+
+/* Button styles */
+.button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 20px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #555;
+    color: white;
+}
+
+/* Inventory table styles */
+.inventory-table {
+    width: 80%; /* Adjust the width as needed */
+    margin: 0 auto; /* Center the table horizontally */
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.inventory-table th,
+.inventory-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.inventory-table th {
+    background-color: #333;
+    color: white;
+}
+
+/* Styling for table rows */
+.inventory-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Styling for table buttons */
+.inventory-table button {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.inventory-table button:hover {
+    background-color: #45a049;
+}
+
+.form-container {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    width: 80%;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+/* Form styles */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"]{
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 80%;
+    font-size: 16px;
+}
+
+.form-submit-button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 10px 2px;
+}
+
+.form-submit-button:hover {
+    background-color: #555;
+}
+
+#logoutButtonContainer {
+    display: inline-block;
+}
+
+#logoutButtonContainer button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 18px;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 0;
+}
+
+#logoutButtonContainer button:hover {
+    background-color: #555;
+}
+
+/* Signup Form Styles */
+.signup-form {
+    background-color: #f2f2f2;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+}
+
+.signup-form h2 {
+    margin-bottom: 20px;
+}
+
+.signup-form label,
+.signup-form input[type="text"],
+.signup-form input[type="password"],
+.signup-form input[type="date"] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.signup-form .form-submit-button {
+    background-color: black;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.signup-form .form-submit-button:hover {
+    background-color: #45a049;
+}
+
+/* Login Form Styles */
+.login-form {
+    background-color: #f2f2f2;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+}
+
+.login-form h2 {
+    margin-bottom: 20px;
+}
+
+.login-form label,
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.login-form .form-submit-button {
+    background-color: black;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.login-form .form-submit-button:hover {
+    background-color: #45a049;
+}
+
+.form-container select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 4px;
+    background-color: #fff; /* Background color for the select box */
+    color: #333; /* Text color for the select box */
+    font-size: 16px;
+}
+
+/* Styling when the select element is focused */
+.form-container select:focus {
+    outline: none;
+    border-color: #4CAF50; /* Border color when focused */
+}
+
+.addMoreItems{
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 10px 10px 10px
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.log-table th, .log-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.log-table th {
+    background-color: #f2f2f2;
+}
+
+.delivery-table {
+    width: 80%; /* Adjust the width as needed */
+    margin: 0 auto; /* Center the table horizontally */
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.delivery-table th,
+.delivery-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.delivery-table th {
+    background-color: #333;
+    color: white;
+}
+
+/* Styling for table rows */
+.delivery-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Styling for table buttons */
+.delivery-table button {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.delivery-table button:hover {
+    background-color: #45a049;
+}
+
+/* Health Report Form Styles */
+.health-report-form {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    width: 80%;
+    margin: 80px auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.health-report-form h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+/* Form styles for the Health Report Form */
+#healthReportForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#healthReportForm label {
+    width: 80%;
+    font-size: 16px;
+    text-align: left;
+}
+
+#healthReportForm input[type="text"],
+#healthReportForm input[type="email"],
+#healthReportForm textarea {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 80%;
+    font-size: 16px;
+}
+
+#healthReportForm textarea {
+    height: 100px; /* Increase the height of the textarea */
+}
+
+#healthReportForm button[type="submit"] {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 20px 2px;
+}
+
+#healthReportForm button[type="submit"]:hover {
+    background-color: #555;
+}
+
+
+

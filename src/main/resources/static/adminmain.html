@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome Admin!</title>
+    <link rel="stylesheet" type="text/css" href="global.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-brand">FFsmart Fridge</div>
+    <div class="navbar-links">
+        <div id="logoutButtonContainer"></div>
+    </div>
+</nav>
+<div class="admin-panel">
+    <h1>Admin Panel</h1>
+    <table class="delivery-table">
+        <thead>
+        <tr>
+            <th>UserID</th>
+            <th>Full Name</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="userTableBody">
+        <!-- Dynamically generated rows will go here -->
+        </tbody>
+    </table>
+</div>
+<div class="health-report-form">
+    <h2>Health Report Form</h2>
+    <form id="healthReportForm">
+        <label for="ownerName">Owner Name:</label>
+        <input type="text" id="ownerName" name="ownerName" required><br>
+
+        <label for="ownerEmail">Owner Email:</label>
+        <input type="email" id="ownerEmail" name="ownerEmail" required><br>
+
+        <label for="receivingEmail">Receiving Email:</label>
+        <input type="email" id="receivingEmail" name="receivingEmail" required><br>
+
+        <label for="businessPhone">Business Phone:</label>
+        <input type="text" id="businessPhone" name="businessPhone" required><br>
+
+        <label for="businessName">Business Name:</label>
+        <input type="text" id="businessName" name="businessName"><br>
+
+        <label for="restaurantName">Restaurant Name:</label>
+        <input type="text" id="restaurantName" name="restaurantName"><br>
+
+        <label for="restaurantAddress">Restaurant Address:</label>
+        <input type="text" id="restaurantAddress" name="restaurantAddress"><br>
+
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city"><br>
+
+        <label for="zipCode">Zip Code:</label>
+        <input type="text" id="zipCode" name="zipCode"><br>
+
+        <label for="certifiedFoodHandler">Certified Food Handler:</label>
+        <input type="text" id="certifiedFoodHandler" name="certifiedFoodHandler"><br>
+
+        <label for="reportDetails">Report Details:</label>
+        <textarea id="reportDetails" name="reportDetails" rows="5" required></textarea><br>
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+<script>
+
+    document.getElementById('healthReportForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/send-health-report', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+            } else {
+                alert(data.error);
+            }
+
+            // Clear the form after submission
+            form.reset();
+        } catch (error) {
+            console.error('Error sending health report:', error);
+        }
+    });
+
+    async function logout() {
+        try {
+            const response = await fetch('/logout');
+            const data = await response.json();
+
+            alert(data.message);
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    }
+
+    async function checkLoginStatusAndDisplayLogout() {
+        try {
+            const response = await fetch('/is-logged-in');
+            const data = await response.json();
+
+            const buttonContainer = document.getElementById('logoutButtonContainer');
+            buttonContainer.innerHTML = '';
+
+            if (data.loggedIn) {
+                const logoutButton = document.createElement('button');
+                logoutButton.textContent = 'Log Out';
+                logoutButton.onclick = logout;
+                buttonContainer.appendChild(logoutButton);
+            } else {
+                const loginButton = document.createElement('button');
+                loginButton.textContent = 'Log In | Sign Up';
+                loginButton.onclick = () => window.location.href = 'index.html';
+                buttonContainer.appendChild(loginButton);
+            }
+        } catch (error) {
+            console.error('Error checking login status:', error);
+        }
+    }
+
+    async function fetchAndDisplayUserData() {
+        try {
+            const response = await fetch('/fetch-users'); // Replace with the actual endpoint to fetch user data
+            const data = await response.json();
+
+            const userTableBody = document.getElementById('userTableBody');
+            userTableBody.innerHTML = '';
+
+            data.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.fullname}</td>
+                    <td>${user.username}</td>
+                    <td>
+                        <select id="roleSelect${user.id}">
+                            <option value="Admin" ${user.role === 'Admin' ? 'selected' : ''}>Admin</option>
+                            <option value="Chef" ${user.role === 'Chef' ? 'selected' : ''}>Chef</option>
+                            <option value="Delivery Person" ${user.role === 'Delivery Person' ? 'selected' : ''}>Delivery Person</option>
+                        </select>
+                    </td>
+                    <td><button onclick="updateUserRole(${user.id})">Update Role</button></td>
+                `;
+                userTableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching and displaying user data:', error);
+        }
+    }
+
+    async function updateUserRole(userId) {
+        try {
+            const roleSelect = document.getElementById(`roleSelect${userId}`);
+            const newRole = roleSelect.value;
+
+            const response = await fetch(`/update-user-role/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: newRole })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+            } else {
+                alert(data.error);
+            }
+
+            // Refresh user data after updating
+            fetchAndDisplayUserData();
+        } catch (error) {
+            console.error('Error updating user role:', error);
+        }
+    }
+
+    window.onload = function () {
+        checkLoginStatusAndDisplayLogout();
+        fetchAndDisplayUserData();
+    }
+</script>
+</body>
+</html>

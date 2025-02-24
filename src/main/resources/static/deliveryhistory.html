@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome Delivery People!</title>
+    <link rel="stylesheet" type="text/css" href="global.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-brand">FFsmart Fridge</div>
+    <div class="navbar-links">
+        <a href="deliverymain.html">Deliveries</a>
+        <a href="deliveryhistory.html">Delivery History</a>
+        <div id="logoutButtonContainer"></div>
+    </div>
+</nav>
+<h1>Delivery History</h1>
+<table class="log-table">
+    <thead>
+    <tr>
+        <th>Quantity</th>
+        <th>Item Name</th>
+        <th>Date</th>
+        <th>Chef Name</th>
+    </tr>
+    </thead>
+    <tbody id="deliveryHistoryTable">
+    <!-- Dynamically generated rows will go here -->
+    </tbody>
+</table>
+<script>
+    async function getChefName(chefId) {
+        try {
+            const response = await fetch(`/deliveries/users/${chefId}`);
+            if (response.ok) {
+                const chef = await response.json();
+                if (chef && chef.fullname) {
+                    return chef.fullname;
+                } else {
+                    return 'Unknown Chef';
+                }
+            } else {
+                console.error('Error fetching chef name:', response.statusText);
+                return 'Unknown Chef';
+            }
+        } catch (error) {
+            console.error('Error fetching chef name:', error);
+            return 'Unknown Chef';
+        }
+    }
+
+    // Fetch delivery history data and populate the table
+    fetch('/deliveries/delivery-history')
+        .then(response => response.json())
+        .then(async data => {
+            const deliveryHistoryTable = document.getElementById('deliveryHistoryTable');
+            for (const order of data) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${order.itemQuantity}</td>
+                <td>${order.itemName}</td>
+                <td>${new Date(order.deliveryDate).toLocaleDateString()}</td>
+                <td>${await getChefName(order.chefId)}</td>
+            `;
+                deliveryHistoryTable.appendChild(row);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching delivery history:', error);
+        });
+    async function logout() {
+        try {
+            const response = await fetch('/logout');
+            const data = await response.json();
+
+            alert(data.message);
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    }
+
+    async function checkLoginStatusAndDisplayLogout() {
+        try {
+            const response = await fetch('/is-logged-in');
+            const data = await response.json();
+
+            const buttonContainer = document.getElementById('logoutButtonContainer');
+            buttonContainer.innerHTML = '';
+
+            if (data.loggedIn) {
+                const logoutButton = document.createElement('button');
+                logoutButton.textContent = 'Log Out';
+                logoutButton.onclick = logout;
+                buttonContainer.appendChild(logoutButton);
+            } else {
+                const loginButton = document.createElement('button');
+                loginButton.textContent = 'Log In | Sign Up';
+                loginButton.onclick = () => window.location.href = 'index.html';
+                buttonContainer.appendChild(loginButton);
+            }
+        } catch (error) {
+            console.error('Error checking login status:', error);
+        }
+    }
+
+    window.onload = function () {
+        checkLoginStatusAndDisplayLogout();
+    }
+</script>
+</body>
+</html>

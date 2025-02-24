@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome Delivery People!</title>
+    <link rel="stylesheet" type="text/css" href="global.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-brand">FFsmart Fridge</div>
+</nav>
+<h1>Finish Order</h1>
+<form id="finishOrderForm">
+    <table id="ordersTable" class="delivery-table">
+        <thead>
+        <tr>
+            <th>Chef Name</th>
+            <th>Item Name</th>
+            <th>Expiry Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Dynamically generated rows will go here -->
+        </tbody>
+    </table>
+    <button type="submit" class="form-submit-button">Insert Items into Fridge</button>
+</form>
+
+<script>
+    async function loadCurrentOrders() {
+        try {
+            const response = await fetch('/deliveries/current-delivery-orders');
+            if (response.ok) {
+                const orders = await response.json();
+                generateOrderForms(orders);
+            } else {
+                console.error('Error loading orders');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function generateOrderForms(orders) {
+        const tableBody = document.getElementById('ordersTable').querySelector('tbody');
+
+        orders.forEach(order => {
+            for (let i = 0; i < order.itemQuantity; i++) {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${order.chefName}</td>
+                    <td>${order.itemName}</td>
+                    <td><input type="date" name="itemExpiry[]"></td>
+                `;
+            }
+        });
+    }
+
+    document.getElementById('finishOrderForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        try {
+            const tableBody = document.getElementById('ordersTable').querySelector('tbody');
+            const rows = tableBody.querySelectorAll('tr');
+            const expiryDateInputs = [];
+
+            rows.forEach(row => {
+                const chefName = row.cells[0].textContent;
+                const itemName = row.cells[1].textContent;
+                const itemExpiry = row.cells[2].querySelector('input').value;
+
+                expiryDateInputs.push({ itemName, itemExpiry });
+            });
+
+            console.log('Sending POST request to /deliveries/finish-order with the following data:');
+            console.log(JSON.stringify(expiryDateInputs));
+
+            const response = await fetch('/deliveries/finish-order', {
+                method: 'POST',
+                body: JSON.stringify(expiryDateInputs),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Received response from /deliveries/finish-order:');
+            console.log(response);
+
+            if (response.ok) {
+                alert('Items have been inserted, order finished successfully!');
+                window.location.href = 'deliverymain.html';
+            } else {
+                console.error('Error finishing order');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+
+    window.onload = loadCurrentOrders;
+</script>
+</body>
+</html>
